@@ -63,10 +63,10 @@ if __name__ == "__main__":
     t0 = time.time()
 
     # Crée un jeu Skyscrapers avec des indices initiaux
-    game = Game(4, [([1, 2, 3, 4], [2, 2, 2, 1]), ([1, 2, 2, 2], [4, 3, 2, 1])])
-    #                    ^              ^               ^               ^ 
-    #                   TOP            DOWN            LEFT           RIGHT
-
+    game = Game(5, [([2, 3, 2, 4, 1], [3, 3, 2, 1, 3]), ([2, 1, 2, 3, 3], [1, 4, 2, 3, 2])])
+    #           ^          ^                ^                  ^                 ^ 
+    #           N         TOP             DOWN               LEFT              RIGHT
+    
     # Affiche le plateau avec les conditions initiales.
     game.show_board()
 
@@ -76,7 +76,7 @@ if __name__ == "__main__":
     print("\n------------------\n")
     
     solution = solve.solve()
-    
+
     if solution:
         print("Solution:\n")
         game.board = solution
