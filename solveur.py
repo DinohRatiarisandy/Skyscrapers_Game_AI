@@ -25,6 +25,68 @@ class SolveBoard:
         self.board = board
         self.clues_horiz = clues_horiz
         self.clues_verti = clues_verti
+        self.place_obvious_numbers()
+
+    def place_obvious_numbers(self):
+        """
+        Place les nombres évidents sur le plateau en utilisant les indices horizontaux et verticaux.
+        """
+        self.place_obvious_numbers_horizontal()
+        self.place_obvious_numbers_vertical()
+
+    def place_obvious_numbers_horizontal(self):
+        """
+        Place les nombres évidents dans les lignes du plateau en fonction des indices horizontaux.
+        """
+        for idx, (top_clue, down_clue) in enumerate(zip(self.clues_horiz[0], self.clues_horiz[1])):
+            if top_clue == 1:
+                self.board[0][idx] = self.N
+            elif top_clue == self.N:
+                for r in range(self.N):
+                    self.board[r][idx] = r + 1
+
+            if down_clue == 1:
+                self.board[self.N-1][idx] = self.N
+            elif down_clue == self.N:
+                for r in range(self.N-1, -1, -1):
+                    self.board[r][idx] = self.N - r
+
+    def place_obvious_numbers_vertical(self):
+        """
+        Place les nombres évidents dans les colonnes du plateau en fonction des indices verticaux.
+        """
+        for idx, (left_clue, right_clue) in enumerate(zip(self.clues_verti[0], self.clues_verti[1])):
+            if left_clue == 1:
+                self.board[idx][0] = self.N
+            elif left_clue == self.N:
+                for c in range(self.N):
+                    self.board[idx][c] = c + 1
+
+            if right_clue == 1:
+                self.board[idx][self.N-1] = self.N
+            elif right_clue == self.N:
+                for c in range(self.N-1, -1, -1):
+                    self.board[idx][c] = self.N - c
+
+    def full(self, current_board, i, to_check):
+        """
+        Vérifie si une ligne ou une colonne spécifiée dans le plateau est complète (toutes les cases remplies).
+
+        Args:
+            current_board (list[list[int]]): Le plateau actuel.
+            i (int): L'indice de la ligne ou de la colonne à vérifier.
+            to_check (str): "row" pour vérifier une ligne, "col" pour vérifier une colonne.
+
+        Returns:
+            bool: True si la ligne ou la colonne est complète, False sinon.
+        """
+        if to_check == "row":
+            # Vérifie si toutes les valeurs dans la ligne spécifiée sont différentes de zéro
+            return all(val != 0 for val in current_board[i])
+        else:  # to_check == "col"
+            # Vérifie s'il y a une valeur nulle dans la colonne spécifiée
+            return all(current_board[c][i] != 0 for c in range(self.N))
+
 
     def is_valid(self, current_board, r, c, num):
         """
@@ -65,7 +127,7 @@ class SolveBoard:
                 left += 1
                 max_ = current_board[r][i]
 
-        if current_board[r][self.N-1] != 0:
+        if self.full(current_board, r, "row"):
             right = 0
             max_ = -float("inf")
             for i in range(self.N-1, -1, -1):
@@ -95,7 +157,7 @@ class SolveBoard:
                 top += 1
                 max_ = current_board[j][c]
 
-        if current_board[self.N-1][c] != 0:
+        if self.full(current_board, c, "col"):
             max_ = -float("inf")
             down = 0
             for j in range(self.N-1, -1, -1):
@@ -137,13 +199,6 @@ class SolveBoard:
         empty_cell = self.find_empty_cell(current_board)
 
         if empty_cell is None:
-            seen = set()
-
-            for r in range(self.N):
-                for c in range(self.N):
-                    if current_board[r][c] in seen:
-                        return None
-
             for i in range(self.N):
                 if not (self.respect_clues_horiz(current_board, i) and self.respect_clues_verti(current_board, i)):
                     return None
@@ -176,3 +231,4 @@ class SolveBoard:
         """
         initial_board = deepcopy(self.board)
         return self.solve_recursive(initial_board, 0, 0)
+
