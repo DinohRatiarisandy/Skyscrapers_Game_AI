@@ -11,11 +11,12 @@ incompatibles sont détectées.
 
 from copy import deepcopy
 
+
 class SolveBoard:
     def __init__(self, board, clues_horiz, clues_verti):
         """
         Initialise un SolveBoard avec un plateau, des indices horizontaux et verticaux.
-        
+
         Args:
             board (list[list[int]]): Le plateau de Skyscrapers initial.
             clues_horiz (list[list[int]]): Les indices horizontaux du Skyscrapers.
@@ -38,7 +39,9 @@ class SolveBoard:
         """
         Place les nombres évidents dans les lignes du plateau en fonction des indices horizontaux.
         """
-        for idx, (top_clue, down_clue) in enumerate(zip(self.clues_horiz[0], self.clues_horiz[1])):
+        for idx, (top_clue, down_clue) in enumerate(
+            zip(self.clues_horiz[0], self.clues_horiz[1])
+        ):
             if top_clue == 1:
                 self.board[0][idx] = self.N
             elif top_clue == self.N:
@@ -46,16 +49,18 @@ class SolveBoard:
                     self.board[r][idx] = r + 1
 
             if down_clue == 1:
-                self.board[self.N-1][idx] = self.N
+                self.board[self.N - 1][idx] = self.N
             elif down_clue == self.N:
-                for r in range(self.N-1, -1, -1):
+                for r in range(self.N - 1, -1, -1):
                     self.board[r][idx] = self.N - r
 
     def place_obvious_numbers_vertical(self):
         """
         Place les nombres évidents dans les colonnes du plateau en fonction des indices verticaux.
         """
-        for idx, (left_clue, right_clue) in enumerate(zip(self.clues_verti[0], self.clues_verti[1])):
+        for idx, (left_clue, right_clue) in enumerate(
+            zip(self.clues_verti[0], self.clues_verti[1])
+        ):
             if left_clue == 1:
                 self.board[idx][0] = self.N
             elif left_clue == self.N:
@@ -63,9 +68,9 @@ class SolveBoard:
                     self.board[idx][c] = c + 1
 
             if right_clue == 1:
-                self.board[idx][self.N-1] = self.N
+                self.board[idx][self.N - 1] = self.N
             elif right_clue == self.N:
-                for c in range(self.N-1, -1, -1):
+                for c in range(self.N - 1, -1, -1):
                     self.board[idx][c] = self.N - c
 
     def full(self, current_board, i, to_check):
@@ -87,7 +92,6 @@ class SolveBoard:
             # Vérifie s'il y a une valeur nulle dans la colonne spécifiée
             return all(current_board[c][i] != 0 for c in range(self.N))
 
-
     def is_valid(self, current_board, r, c, num):
         """
         Vérifie si placer un nombre dans la cellule (r, c) est une configuration valide.
@@ -106,7 +110,9 @@ class SolveBoard:
                 return False
 
         current_board[r][c] = num
-        return self.respect_clues_horiz(current_board, r) and self.respect_clues_verti(current_board, c)
+        return self.respect_clues_horiz(current_board, r) and self.respect_clues_verti(
+            current_board, c
+        )
 
     def respect_clues_horiz(self, current_board, r):
         """
@@ -130,7 +136,7 @@ class SolveBoard:
         if self.full(current_board, r, "row"):
             right = 0
             max_ = -float("inf")
-            for i in range(self.N-1, -1, -1):
+            for i in range(self.N - 1, -1, -1):
                 if current_board[r][i] > max_:
                     right += 1
                     max_ = current_board[r][i]
@@ -160,7 +166,7 @@ class SolveBoard:
         if self.full(current_board, c, "col"):
             max_ = -float("inf")
             down = 0
-            for j in range(self.N-1, -1, -1):
+            for j in range(self.N - 1, -1, -1):
                 if current_board[j][c] > max_:
                     down += 1
                     max_ = current_board[j][c]
@@ -200,13 +206,16 @@ class SolveBoard:
 
         if empty_cell is None:
             for i in range(self.N):
-                if not (self.respect_clues_horiz(current_board, i) and self.respect_clues_verti(current_board, i)):
+                if not (
+                    self.respect_clues_horiz(current_board, i)
+                    and self.respect_clues_verti(current_board, i)
+                ):
                     return None
 
             return current_board
 
         r, c = empty_cell
-        for num in range(1, self.N+1):
+        for num in range(1, self.N + 1):
             if self.is_valid(current_board, r, c, num):
                 new_board = deepcopy(current_board)
                 new_board[r][c] = num
@@ -231,4 +240,3 @@ class SolveBoard:
         """
         initial_board = deepcopy(self.board)
         return self.solve_recursive(initial_board, 0, 0)
-
