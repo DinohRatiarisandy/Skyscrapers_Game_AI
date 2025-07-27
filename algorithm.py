@@ -40,16 +40,12 @@ class BaseSolver(ABC):
         self.board = deepcopy(board)
         self.board_size = len(board)  # board is always square (NxN)
 
-    def solve(self) -> BoardType:
-        self.place_obvious_numbers()
-        return self.search_solution(self.board)
-
     @abstractmethod
     def place_obvious_numbers(self) -> None:
         pass
 
     @abstractmethod
-    def search_solution(self, board: BoardType) -> None:
+    def search_solution(self, board: BoardType) -> BoardType | None:
         pass
 
 
@@ -65,7 +61,7 @@ class ValidatorStrategy(ABC):
         pass
 
     @abstractmethod
-    def is_valid_solution(self, board: BoardType) -> bool:
+    def is_valid_solution(self, board: BoardType, row: int, col: int) -> bool:
         pass
 
 
@@ -125,11 +121,10 @@ class SkyscraperValidator(ValidatorStrategy):
             les règles du jeu.
             False sinon.
         """
-        for i in range(self.clues_len):
-            if self._respect_clues(board, row, Axis.ROW) and self._respect_clues(
-                board, col, Axis.COLUMN
-            ):
-                return True
+        if self._respect_clues(board, row, Axis.ROW) and self._respect_clues(
+            board, col, Axis.COLUMN
+        ):
+            return True
         return False
 
     def is_full(self, board: BoardType, index: int, axis: Axis) -> bool:
