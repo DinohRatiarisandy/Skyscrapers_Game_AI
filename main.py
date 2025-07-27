@@ -1,94 +1,82 @@
-"""
-✔️ Le script principal (main.py) utilise la classe Game
-pour créer un jeu Skyscrapers de taille N avec des indices donnés.
-✔️ Il utilise également la classe SolveBoard pour résoudre le jeu 
-et affiche la solution, le cas échéant.
-Le temps d'exécution est également mesuré.
-"""
-
 import time
 
-from solveur import SolveBoard
+from algorithm import SkyscraperSolver
 
 
 class Game:
-    def __init__(self, N, clues):
-        """
-        Initialise un jeu Skyscrapers avec la taille N et les indices donnés.
+    def __init__(self, size: int, clues: tuple[list[int], list[int]]):
+        self.size = size
+        self.top_clues = clues[0]
+        self.bottom_clues = clues[1]
+        self.left_clues = clues[2]
+        self.right_clues = clues[3]
+        self.board = [[0 for _ in range(size)] for _ in range(size)]
 
-        Args:
-            N (int): La taille du Skyscrapers.
-            clues (tuple): Indices horizontaux et verticaux du Skyscrapers.
-        """
-        self.N = N
-        self.clues_horiz = clues[0]
-        self.clues_verti = clues[1]
-        self.board = [[0 for _ in range(N)] for _ in range(N)]
-        self.board_view = [[0 for _ in range(N + 2)] for _ in range(N + 2)]
-        self.place_clue_horiz()
-        self.place_clue_verti()
 
-    def show_board(self):
-        """
-        Affiche le plateau actuel.
-        """
-        for row in self.board_view:
+class BoardView:
+    def __init__(self, game: Game):
+        self.game = game
+        N = self.game.size
+        self.view = [[0 for _ in range(N + 2)] for _ in range(N + 2)]
+        self._place_clues()
+        self.update_board()
+
+    def _place_clues(self) -> None:
+        N = self.game.size
+        self.view[0][1 : N + 1] = self.game.top_clues
+        self.view[N + 1][1 : N + 1] = self.game.bottom_clues
+
+        for r in range(1, N + 1):
+            self.view[r][0] = self.game.left_clues[r - 1]
+            self.view[r][N + 1] = self.game.right_clues[r - 1]
+
+    def update_board(self) -> None:
+        for r in range(self.game.size):
+            for c in range(self.game.size):
+                self.view[r + 1][c + 1] = self.game.board[r][c]
+
+    def show(self) -> None:
+        for row in self.view:
             print(row)
-
-    def place_clue_horiz(self):
-        """
-        Place les indices horizontaux sur le plateau.
-        """
-        self.board_view[0][1 : self.N + 1] = self.clues_horiz[0]
-        self.board_view[self.N + 1][1 : self.N + 1] = self.clues_horiz[1]
-
-    def place_clue_verti(self):
-        """
-        Place les indices verticaux sur le plateau.
-        """
-        for r in range(1, self.N + 1):
-            self.board_view[r][0] = self.clues_verti[0][r - 1]
-            self.board_view[r][self.N + 1] = self.clues_verti[1][r - 1]
-
-    def show_solution(self):
-        """
-        Affiche la solution sur le plateau.
-        """
-        for r in range(1, self.N + 1):
-            for c in range(1, self.N + 1):
-                self.board_view[r][c] = self.board[r - 1][c - 1]
-
-        self.show_board()
 
 
 if __name__ == "__main__":
     t0 = time.time()
 
-    # Crée un jeu Skyscrapers avec des indices initiaux
-    game = Game(
-        5, [([2, 3, 2, 4, 1], [3, 3, 2, 1, 3]), ([2, 1, 2, 3, 3], [1, 4, 2, 3, 2])]
+    # Initialisation
+    size = 6
+    left = [2, 3, 3, 5, 1, 3]
+    top = [2, 1, 3, 2, 2, 4]
+    right = [5, 2, 2, 1, 4, 3]
+    bottom = [2, 5, 1, 2, 4, 2]
+
+    game = Game(size, (top, bottom, left, right))
+
+    # Initialisasion for big skyscraper state
+    game.board[2][4] = 1
+    game.board[4][1] = 3
+
+    view = BoardView(game)
+    print("Plateau initial :")
+    view.show()
+    print("\nRésolution en cours...\n")
+
+    solver = SkyscraperSolver(
+        board=game.board,
+        left_clues=game.left_clues,
+        top_clues=game.top_clues,
+        right_clues=game.right_clues,
+        bottom_clues=game.bottom_clues,
     )
-    #           ^          ^                ^                  ^                 ^
-    #           N         TOP             DOWN               LEFT              RIGHT
 
-    # Affiche le plateau avec les conditions initiales.
-    game.show_board()
-
-    # Résout le Skyscrapers
-    solve = SolveBoard(game.board, game.clues_horiz, game.clues_verti)
-
-    print("\n------------------\n")
-
-    solution = solve.solve()
+    solution = solver.search_solution(solver.board)
 
     if solution:
-        print("Solution:\n")
         game.board = solution
-        game.show_solution()
+        view.update_board()
+        print("Solution :")
+        view.show()
     else:
-        print("Aucune solution trouvée !")
+        print("❌ Aucune solution trouvée.")
 
-    t1 = time.time()
-
-    # Affiche le temps d'exécution
-    print(f"\nTemps d'exécution: {t1-t0:.3f} s")
+    print(f"\nTemps d'exécution : {time.time() - t0:.3f} s")
