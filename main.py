@@ -4,12 +4,14 @@ from algorithm import SkyscraperSolver
 
 
 class Game:
-    def __init__(self, size: int, clues: tuple[list[int], list[int]]):
+    def __init__(
+        self, size: int, clues: tuple[list[int], list[int], list[int], list[int]]
+    ):
         self.size = size
-        self.top_clues = clues[0]
-        self.bottom_clues = clues[1]
-        self.left_clues = clues[2]
-        self.right_clues = clues[3]
+        self.left_clues = clues[0]
+        self.top_clues = clues[1]
+        self.right_clues = clues[2]
+        self.bottom_clues = clues[3]
         self.board = [[0 for _ in range(size)] for _ in range(size)]
 
 
@@ -50,7 +52,7 @@ if __name__ == "__main__":
     right = [5, 2, 2, 1, 4, 3]
     bottom = [2, 5, 1, 2, 4, 2]
 
-    game = Game(size, (top, bottom, left, right))
+    game = Game(size, (left, top, right, bottom))
 
     # Initialisasion for big skyscraper state
     game.board[2][4] = 1
